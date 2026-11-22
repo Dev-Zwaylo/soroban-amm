@@ -564,6 +564,9 @@ Defined in [contracts/oracle_adapters/src/lib.rs](../contracts/oracle_adapters/s
 | 6 | `StaleSnapshot` | The newest snapshot is older than the configured `max_age_seconds`. | Wait for a fresh snapshot from the keeper. |
 | 7 | `InvalidPrice` | The computed TWAP price is zero or negative. | Check that the pool reserves and cumulative prices are positive. |
 | 8 | `ArithmeticOverflow` | A price conversion or scaling step overflowed. | Use a smaller amount or a pool with less extreme reserves. |
+| 9 | `NoPendingAdmin` | `accept_admin` was called when no admin rotation is pending. | Have the current admin call `propose_admin` first. |
+| 10 | `WrongPendingAdmin` | `accept_admin` was called with an address that does not match the nominated pending admin. | Call `accept_admin` with the nominated address from `get_pending_admin`. |
+| 11 | `Paused` | `quote` was called while the adapter is paused. | Wait for the admin to call `unpause`. |
 
 ---
 
