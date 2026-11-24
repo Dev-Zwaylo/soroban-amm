@@ -139,7 +139,12 @@ impl OracleTwapAdapter {
         token_b: Address,
     ) -> Result<(i128, u64), AdapterError> {
         let factory: Address = Self::read(&env, DataKey::Factory)?;
-        if env.storage().instance().get(&DataKey::Paused).unwrap_or(false) {
+        if env
+            .storage()
+            .instance()
+            .get(&DataKey::Paused)
+            .unwrap_or(false)
+        {
             return Err(AdapterError::Paused);
         }
         let consumer: Address = Self::read(&env, DataKey::Consumer)?;
@@ -232,7 +237,10 @@ impl OracleTwapAdapter {
     }
 
     pub fn is_paused(env: Env) -> bool {
-        env.storage().instance().get(&DataKey::Paused).unwrap_or(false)
+        env.storage()
+            .instance()
+            .get(&DataKey::Paused)
+            .unwrap_or(false)
     }
 
     /// Nominate a new admin. Admin-only; the nominee must separately authorize `accept_admin`.
@@ -241,11 +249,7 @@ impl OracleTwapAdapter {
         env.storage()
             .instance()
             .set(&DataKey::PendingAdmin, &new_admin);
-        emit_versioned_event!(
-            &env,
-            (Symbol::new(&env, "admin_proposed"),),
-            (new_admin,)
-        );
+        emit_versioned_event!(&env, (Symbol::new(&env, "admin_proposed"),), (new_admin,));
         Ok(())
     }
 
@@ -262,11 +266,7 @@ impl OracleTwapAdapter {
         new_admin.require_auth();
         env.storage().instance().set(&DataKey::Admin, &new_admin);
         env.storage().instance().remove(&DataKey::PendingAdmin);
-        emit_versioned_event!(
-            &env,
-            (Symbol::new(&env, "admin_changed"),),
-            (new_admin,)
-        );
+        emit_versioned_event!(&env, (Symbol::new(&env, "admin_changed"),), (new_admin,));
         Ok(())
     }
 
@@ -274,11 +274,7 @@ impl OracleTwapAdapter {
     pub fn set_factory(env: Env, factory: Address) -> Result<(), AdapterError> {
         Self::require_admin(&env)?;
         env.storage().instance().set(&DataKey::Factory, &factory);
-        emit_versioned_event!(
-            &env,
-            (Symbol::new(&env, "factory_updated"),),
-            (factory,)
-        );
+        emit_versioned_event!(&env, (Symbol::new(&env, "factory_updated"),), (factory,));
         Ok(())
     }
 
@@ -286,11 +282,7 @@ impl OracleTwapAdapter {
     pub fn set_consumer(env: Env, consumer: Address) -> Result<(), AdapterError> {
         Self::require_admin(&env)?;
         env.storage().instance().set(&DataKey::Consumer, &consumer);
-        emit_versioned_event!(
-            &env,
-            (Symbol::new(&env, "consumer_updated"),),
-            (consumer,)
-        );
+        emit_versioned_event!(&env, (Symbol::new(&env, "consumer_updated"),), (consumer,));
         Ok(())
     }
 
@@ -304,11 +296,7 @@ impl OracleTwapAdapter {
             }
         }
         env.storage().instance().set(&DataKey::Mode, &mode);
-        emit_versioned_event!(
-            &env,
-            (Symbol::new(&env, "mode_updated"),),
-            (mode,)
-        );
+        emit_versioned_event!(&env, (Symbol::new(&env, "mode_updated"),), (mode,));
         Ok(())
     }
 
@@ -383,11 +371,7 @@ impl OracleTwapAdapter {
         Self::require_admin(&env)?;
         env.deployer()
             .update_current_contract_wasm(new_wasm_hash.clone());
-        emit_versioned_event!(
-            &env,
-            (Symbol::new(&env, "upgraded"),),
-            (new_wasm_hash,)
-        );
+        emit_versioned_event!(&env, (Symbol::new(&env, "upgraded"),), (new_wasm_hash,));
         Ok(())
     }
 
@@ -490,9 +474,7 @@ mod tests {
         }
 
         pub fn get_pool_tokens(env: Env, pool: Address) -> Option<(Address, Address)> {
-            env.storage()
-                .instance()
-                .get(&FactoryKey::PoolTokens(pool))
+            env.storage().instance().get(&FactoryKey::PoolTokens(pool))
         }
     }
 
@@ -520,7 +502,11 @@ mod tests {
                 .set(&ConsumerKey::AmmTwap(pool), &result);
         }
 
-        pub fn get_twap_price_detailed(env: Env, pool: Address, _window_seconds: u64) -> TwapResult {
+        pub fn get_twap_price_detailed(
+            env: Env,
+            pool: Address,
+            _window_seconds: u64,
+        ) -> TwapResult {
             env.storage()
                 .instance()
                 .get(&ConsumerKey::AmmTwap(pool))
@@ -586,22 +572,42 @@ mod tests {
         let new_tiers = vec![&env, 5, 30, 100];
 
         adapter.set_factory(&new_factory);
-        assert!(has_versioned_event(&env, &adapter.address, "factory_updated"));
+        assert!(has_versioned_event(
+            &env,
+            &adapter.address,
+            "factory_updated"
+        ));
 
         adapter.set_consumer(&new_consumer);
-        assert!(has_versioned_event(&env, &adapter.address, "consumer_updated"));
+        assert!(has_versioned_event(
+            &env,
+            &adapter.address,
+            "consumer_updated"
+        ));
 
         adapter.set_fee_tiers(&new_tiers);
-        assert!(has_versioned_event(&env, &adapter.address, "fee_tiers_updated"));
+        assert!(has_versioned_event(
+            &env,
+            &adapter.address,
+            "fee_tiers_updated"
+        ));
 
         adapter.set_mode(&AdapterMode::ConcentratedLiquidity);
         assert!(has_versioned_event(&env, &adapter.address, "mode_updated"));
 
         adapter.set_window(&900);
-        assert!(has_versioned_event(&env, &adapter.address, "window_updated"));
+        assert!(has_versioned_event(
+            &env,
+            &adapter.address,
+            "window_updated"
+        ));
 
         adapter.set_max_age(&1_800);
-        assert!(has_versioned_event(&env, &adapter.address, "max_age_updated"));
+        assert!(has_versioned_event(
+            &env,
+            &adapter.address,
+            "max_age_updated"
+        ));
 
         let (factory, consumer, mode, window, max_age) = adapter.get_config();
         assert_eq!(factory, new_factory);
@@ -641,7 +647,9 @@ mod tests {
         assert!(adapter.try_propose_admin(&attacker).is_err());
         assert!(adapter.try_pause().is_err());
         assert!(adapter.try_unpause().is_err());
-        assert!(adapter.try_upgrade(&BytesN::from_array(&env, &[1u8; 32])).is_err());
+        assert!(adapter
+            .try_upgrade(&BytesN::from_array(&env, &[1u8; 32]))
+            .is_err());
     }
 
     #[test]
@@ -706,7 +714,11 @@ mod tests {
             }])
             .propose_admin(&new_admin);
         assert_eq!(adapter.get_pending_admin(), Some(new_admin.clone()));
-        assert!(has_versioned_event(&env, &adapter.address, "admin_proposed"));
+        assert!(has_versioned_event(
+            &env,
+            &adapter.address,
+            "admin_proposed"
+        ));
 
         // Wrong address cannot accept
         assert_eq!(
@@ -843,15 +855,21 @@ mod tests {
                 Some(admin.clone())
             );
             assert_eq!(
-                env.storage().instance().get::<_, Address>(&DataKey::Factory),
+                env.storage()
+                    .instance()
+                    .get::<_, Address>(&DataKey::Factory),
                 Some(factory.clone())
             );
             assert_eq!(
-                env.storage().instance().get::<_, Address>(&DataKey::Consumer),
+                env.storage()
+                    .instance()
+                    .get::<_, Address>(&DataKey::Consumer),
                 Some(consumer.clone())
             );
             assert_eq!(
-                env.storage().instance().get::<_, AdapterMode>(&DataKey::Mode),
+                env.storage()
+                    .instance()
+                    .get::<_, AdapterMode>(&DataKey::Mode),
                 Some(AdapterMode::Amm)
             );
             assert_eq!(

@@ -805,6 +805,22 @@ count. Events marked unversioned carry their payload without the
 | `unpaused` | 1 | `caller` | v1 |
 | `upgraded` | 1 | `new_wasm_hash` | v1 |
 
+### `oracle_adapters`
+
+| Event | Topics | Payload fields | Envelope |
+|---|---|---|---|
+| `admin_changed` | 1 | `new_admin` | v1 |
+| `admin_proposed` | 1 | `new_admin` | v1 |
+| `consumer_updated` | 1 | `consumer` | v1 |
+| `factory_updated` | 1 | `factory` | v1 |
+| `fee_tiers_updated` | 1 | `fee_tiers` | v1 |
+| `max_age_updated` | 1 | `max_age_seconds` | v1 |
+| `mode_updated` | 1 | `mode` | v1 |
+| `paused` | 1 | `paused` | v1 |
+| `unpaused` | 1 | `paused` | v1 |
+| `upgraded` | 1 | `new_wasm_hash` | v1 |
+| `window_updated` | 1 | `window_seconds` | v1 |
+
 ### `oracle_aggregator`
 
 | Event | Topics | Payload fields | Envelope |
