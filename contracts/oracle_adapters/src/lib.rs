@@ -246,7 +246,6 @@ impl OracleTwapAdapter {
     }
 }
 
-
 #[cfg(test)]
 mod unit_tests {
     extern crate std;
@@ -312,9 +311,7 @@ mod unit_tests {
         }
 
         pub fn get_pool_tokens(env: Env, pool: Address) -> Option<(Address, Address)> {
-            env.storage()
-                .instance()
-                .get(&FactoryKey::PoolTokens(pool))
+            env.storage().instance().get(&FactoryKey::PoolTokens(pool))
         }
     }
 
@@ -349,7 +346,11 @@ mod unit_tests {
                 .set(&ConsumerKey::ClTwap(pool), &result);
         }
 
-        pub fn get_twap_price_detailed(env: Env, pool: Address, _window_seconds: u64) -> TwapResult {
+        pub fn get_twap_price_detailed(
+            env: Env,
+            pool: Address,
+            _window_seconds: u64,
+        ) -> TwapResult {
             env.storage()
                 .instance()
                 .get(&ConsumerKey::AmmTwap(pool))
