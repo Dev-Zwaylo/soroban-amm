@@ -312,7 +312,9 @@ mod tests {
             }
 
             pub fn get_pool(env: Env, token_a: Address, token_b: Address) -> Option<Address> {
-                env.storage().instance().get(&Key::AmmPool(token_a, token_b))
+                env.storage()
+                    .instance()
+                    .get(&Key::AmmPool(token_a, token_b))
             }
 
             pub fn get_cl_pool(
